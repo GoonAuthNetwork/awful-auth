@@ -1,7 +1,7 @@
 [tool.poetry]
 name = "awful-auth"
 version = "0.1.0"
-description = "Authentication service for proof of gooniness"
+description = "Authentication service for Goon Auth Network"
 authors = ["Ian P <ian@aotc.us>"]
 repository = "https://github.com/GoonAuthNetwork/awful-auth"
 license = "GPL-3.0"
@@ -16,13 +16,13 @@ gunicorn = "20.0.4"
 redis = "3.5.3"
 requests = "2.25.1"
 httpx = "0.17.1"
-python-dotenv = "^0.15.0"
+python-dotenv = "0.15.0"
+fakeredis = "1.4.5"
 
 [tool.poetry.dev-dependencies]
 flake8 = "^3.9.0"
 black = "^20.8b1"
 pytest = "^6.2.2"
-fakeredis = "^1.4.5"
 pytest-httpx = "^0.11.0"
 
 [build-system]
