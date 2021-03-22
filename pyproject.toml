@@ -3,7 +3,10 @@ name = "awful-auth"
 version = "0.1.0"
 description = "Authentication service for proof of gooniness"
 authors = ["Ian P <ian@aotc.us>"]
+repository = "https://github.com/GoonAuthNetwork/awful-auth"
 license = "GPL-3.0"
+readme = "README.md"
+
 
 [tool.poetry.dependencies]
 python = "^3.8"
