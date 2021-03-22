@@ -5,13 +5,13 @@ import string
 from fakeredis import FakeStrictRedis
 from fastapi.testclient import TestClient
 
-import src.server
+import awful_auth.server
 
 # Mock Redis cache
-src.server.cache = FakeStrictRedis(decode_responses=True)  # noqa: F811
+awful_auth.server.cache = FakeStrictRedis(decode_responses=True)  # noqa: F811
 
 # Make a TestClient from our FastAPI server
-client = TestClient(src.server.app)
+client = TestClient(awful_auth.server.app)
 
 
 # Generate a random, valid, username to test with
@@ -21,15 +21,15 @@ def generate_username() -> str:
 
 # Generate the url we need to mock for SA profile requests
 def generate_profile_url(user_name: str) -> str:
-    return src.server.SA_PROFILE_URL + user_name
+    return awful_auth.server.SA_PROFILE_URL + user_name
 
 
 # Add a user_name & hash to the redis cache
 def generate_hash_in_cache(user_name: str) -> str:
-    req = src.server.AuthRequest(user_name=user_name)
-    func = src.server.generate_goon_challenge(req)
+    req = awful_auth.server.AuthRequest(user_name=user_name)
+    func = awful_auth.server.generate_goon_challenge(req)
 
     loop = asyncio.get_event_loop()
-    res: src.server.AuthChallenge = loop.run_until_complete(func)
+    res: awful_auth.server.AuthChallenge = loop.run_until_complete(func)
 
     return res.hash
