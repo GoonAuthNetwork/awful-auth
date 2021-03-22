@@ -13,6 +13,9 @@
                 "src.server:app",
                 "--reload"
             ],
+            "env": {
+                "development": "true"
+            }
         }
     ]
 }

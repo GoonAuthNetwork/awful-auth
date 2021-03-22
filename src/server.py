@@ -1,20 +1,33 @@
 from urllib import parse
 import uuid
 
-from fastapi import FastAPI, Query, HTTPException
+from fastapi import FastAPI, HTTPException, Query
 from pydantic import BaseModel, Field
-
-# from redis import StrictRedis
+from redis import StrictRedis
 from fakeredis import FakeStrictRedis
 import httpx
 
-HASH_CHALLENGE_LIFESPAN_MINS = 10
-HASH_AUTH_LIFESPAN_MINS = 5
-SA_COOKIES = {"sessionid": "", "sessionhash": "", "bbuserid": "", "bbpassword": ""}
+from . import settings
+
+SA_COOKIES = {
+    "sessionid": settings.SA_COOKIES_SESSION_ID,
+    "sessionhash": settings.SA_COOKIES_SESSION_HASH,
+    "bbuserid": settings.SA_COOKIES_BB_USER_ID,
+    "bbpassword": settings.SA_COOKIES_BB_PASSWORD,
+}
+
 SA_PROFILE_URL = "http://forums.somethingawful.com/member.php?action=getinfo&username="
 
-# cache = StrictRedis(host="127.0.0.1", port=6379, db=0, decode_responses=True)
-cache = FakeStrictRedis(decode_responses=True)
+if settings.CACHE_SYSTEM == "redis":
+    cache = StrictRedis(
+        host=settings.CACHE_REDIS_HOST,
+        port=settings.CACHE_REDIS_PORT,
+        db=settings.CACHE_REDIS_DB,
+        password=settings.CACHE_REDIS_PASSWORD,
+    )
+else:
+    cache = FakeStrictRedis(decode_responses=True)
+
 app = FastAPI()
 
 
@@ -45,7 +58,9 @@ async def generate_goon_challenge(request: AuthRequest):
 
     if hash is None:
         hash = str(uuid.uuid4()).replace("-", "")[:32]
-        cache.setex(f"hash:{user_name}", HASH_CHALLENGE_LIFESPAN_MINS * 60, hash)
+        cache.setex(
+            f"hash:{user_name}", settings.HASH_CHALLENGE_LIFESPAN_MINS * 60, hash
+        )
 
     return AuthChallenge(user_name=user_name, hash=hash)
 
@@ -79,7 +94,9 @@ async def verify_challenge(
             response = await client.get(SA_PROFILE_URL + user_name, cookies=SA_COOKIES)
 
         if response.status_code == 200 and hash in response.text:
-            cache.setex(f"authed:{user_name}", HASH_AUTH_LIFESPAN_MINS * 60, "true")
+            cache.setex(
+                f"authed:{user_name}", settings.HASH_AUTH_LIFESPAN_MINS * 60, "true"
+            )
             return AuthStatus(validated=True)
         else:
             raise HTTPException(status_code=404, detail="Hash not found in SA profile")

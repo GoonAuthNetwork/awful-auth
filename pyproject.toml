@@ -6,13 +6,14 @@ authors = ["Ian P <ian@aotc.us>"]
 license = "GPL-3.0"
 
 [tool.poetry.dependencies]
-python = "3.8"
+python = "^3.8"
 fastapi = "0.63.0"
 uvicorn = "0.13.4"
 gunicorn = "20.0.4"
 redis = "3.5.3"
 requests = "2.25.1"
 httpx = "0.17.1"
+python-dotenv = "^0.15.0"
 
 [tool.poetry.dev-dependencies]
 flake8 = "^3.9.0"

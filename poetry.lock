@@ -331,6 +331,17 @@ pytest = ">=6.0.0,<7.0.0"
 testing = ["pytest-asyncio (>=0.14.0,<0.15.0)", "pytest-cov (>=2.0.0,<3.0.0)"]
 
 [[package]]
+name = "python-dotenv"
+version = "0.15.0"
+description = "Add .env support to your django/flask apps in development and deployments"
+category = "main"
+optional = false
+python-versions = "*"
+
+[package.extras]
+cli = ["click (>=5.0)"]
+
+[[package]]
 name = "redis"
 version = "3.5.3"
 description = "Python client for Redis key-value store"
@@ -470,8 +481,8 @@ standard = ["websockets (>=8.0.0,<9.0.0)", "watchgod (>=0.6)", "python-dotenv (>
 
 [metadata]
 lock-version = "1.1"
-python-versions = "3.8"
-content-hash = "5dbe7ccfb691a348a1337d4da0b93977a51d2e58cc4fecd0a829f8a96d2dca64"
+python-versions = "^3.8"
+content-hash = "4fff591ce122ed36845f93d11ee4695d30f9ad5e6e3a3412fcb5eb0b25de5ae1"
 
 [metadata.files]
 appdirs = [
@@ -608,6 +619,10 @@ pytest = [
 pytest-httpx = [
     {file = "pytest_httpx-0.11.0-py3-none-any.whl", hash = "sha256:331e2db4a44c331d037545f024fb75a11c29fff2a0e6cfa58cc8ebaa01ca15bc"},
     {file = "pytest_httpx-0.11.0.tar.gz", hash = "sha256:928cab62e7597d645878ae273fd48b1af11dd3195fd35ec5c99d8537c095d18b"},
+]
+python-dotenv = [
+    {file = "python-dotenv-0.15.0.tar.gz", hash = "sha256:587825ed60b1711daea4832cf37524dfd404325b7db5e25ebe88c495c9f807a0"},
+    {file = "python_dotenv-0.15.0-py2.py3-none-any.whl", hash = "sha256:0c8d1b80d1a1e91717ea7d526178e3882732420b03f08afea0406db6402e220e"},
 ]
 redis = [
     {file = "redis-3.5.3-py2.py3-none-any.whl", hash = "sha256:432b788c4530cfe16d8d943a09d40ca6c16149727e4afe8c2c9d5580c59d9f24"},
