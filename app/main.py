@@ -7,23 +7,23 @@ from redis import StrictRedis
 from fakeredis import FakeStrictRedis
 import httpx
 
-from . import settings
+from . import config
 
 SA_COOKIES = {
-    "sessionid": settings.SA_COOKIES_SESSION_ID,
-    "sessionhash": settings.SA_COOKIES_SESSION_HASH,
-    "bbuserid": settings.SA_COOKIES_BB_USER_ID,
-    "bbpassword": settings.SA_COOKIES_BB_PASSWORD,
+    "sessionid": config.SA_COOKIES_SESSION_ID,
+    "sessionhash": config.SA_COOKIES_SESSION_HASH,
+    "bbuserid": config.SA_COOKIES_BB_USER_ID,
+    "bbpassword": config.SA_COOKIES_BB_PASSWORD,
 }
 
 SA_PROFILE_URL = "http://forums.somethingawful.com/member.php?action=getinfo&username="
 
-if settings.CACHE_SYSTEM == "redis":
+if config.CACHE_SYSTEM == "redis":
     cache = StrictRedis(
-        host=settings.CACHE_REDIS_HOST,
-        port=settings.CACHE_REDIS_PORT,
-        db=settings.CACHE_REDIS_DB,
-        password=settings.CACHE_REDIS_PASSWORD,
+        host=config.CACHE_REDIS_HOST,
+        port=config.CACHE_REDIS_PORT,
+        db=config.CACHE_REDIS_DB,
+        password=config.CACHE_REDIS_PASSWORD,
     )
 else:
     cache = FakeStrictRedis(decode_responses=True)
@@ -58,9 +58,7 @@ async def generate_goon_challenge(request: AuthRequest):
 
     if hash is None:
         hash = str(uuid.uuid4()).replace("-", "")[:32]
-        cache.setex(
-            f"hash:{user_name}", settings.HASH_CHALLENGE_LIFESPAN_MINS * 60, hash
-        )
+        cache.setex(f"hash:{user_name}", config.HASH_CHALLENGE_LIFESPAN_MINS * 60, hash)
 
     return AuthChallenge(user_name=user_name, hash=hash)
 
@@ -95,7 +93,7 @@ async def verify_challenge(
 
         if response.status_code == 200 and hash in response.text:
             cache.setex(
-                f"authed:{user_name}", settings.HASH_AUTH_LIFESPAN_MINS * 60, "true"
+                f"authed:{user_name}", config.HASH_AUTH_LIFESPAN_MINS * 60, "true"
             )
             return AuthStatus(validated=True)
         else:

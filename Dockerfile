@@ -11,6 +11,6 @@ COPY ./pyproject.toml ./poetry.lock* /app/
 
 RUN poetry install --no-root --no-dev
 
-ENV MODULE_NAME "awful_auth.server"
+ENV MODULE_NAME "app.main"
 
-COPY awful_auth /app/awful_auth
+COPY app /app/app
