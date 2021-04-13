@@ -7,23 +7,14 @@ from redis import StrictRedis
 from fakeredis import FakeStrictRedis
 import httpx
 
-from . import config
+from app.config import api_settings, sa_settings
 
-SA_COOKIES = {
-    "sessionid": config.SA_COOKIES_SESSION_ID,
-    "sessionhash": config.SA_COOKIES_SESSION_HASH,
-    "bbuserid": config.SA_COOKIES_BB_USER_ID,
-    "bbpassword": config.SA_COOKIES_BB_PASSWORD,
-}
-
-SA_PROFILE_URL = "http://forums.somethingawful.com/member.php?action=getinfo&username="
-
-if config.CACHE_SYSTEM == "redis":
+if api_settings.cache_system == "redis":
     cache = StrictRedis(
-        host=config.CACHE_REDIS_HOST,
-        port=config.CACHE_REDIS_PORT,
-        db=config.CACHE_REDIS_DB,
-        password=config.CACHE_REDIS_PASSWORD,
+        host=api_settings.redis_host,
+        port=api_settings.redis_port,
+        db=api_settings.redis_db,
+        password=api_settings.redis_pass,
     )
 else:
     cache = FakeStrictRedis(decode_responses=True)
@@ -58,7 +49,7 @@ async def generate_goon_challenge(request: AuthRequest):
 
     if hash is None:
         hash = str(uuid.uuid4()).replace("-", "")[:32]
-        cache.setex(f"hash:{user_name}", config.HASH_CHALLENGE_LIFESPAN_MINS * 60, hash)
+        cache.setex(f"hash:{user_name}", api_settings.challenge_lifespan * 60, hash)
 
     return AuthChallenge(user_name=user_name, hash=hash)
 
@@ -89,12 +80,12 @@ async def verify_challenge(
     hash = cache.get(f"hash:{user_name}")
     if hash is not None:
         async with httpx.AsyncClient() as client:
-            response = await client.get(SA_PROFILE_URL + user_name, cookies=SA_COOKIES)
+            profile = sa_settings.create_profile_url(user_name)
+            cookies = sa_settings.create_cookie_container()
+            response = await client.get(profile, cookies=cookies)
 
         if response.status_code == 200 and hash in response.text:
-            cache.setex(
-                f"authed:{user_name}", config.HASH_AUTH_LIFESPAN_MINS * 60, "true"
-            )
+            cache.setex(f"authed:{user_name}", api_settings.auth_lifespan * 60, "true")
             return AuthStatus(validated=True)
         else:
             raise HTTPException(status_code=404, detail="Hash not found in SA profile")

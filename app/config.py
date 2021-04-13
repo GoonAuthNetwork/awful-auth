@@ -1,5 +1,12 @@
+from enum import Enum
 import os
+from pathlib import Path
+import sys
+from typing import Dict, Optional
+
 from dotenv import load_dotenv
+from loguru import logger
+from pydantic import BaseSettings, Field
 
 DEVELOPMENT = os.environ.get("development", "False") == "True"
 
@@ -8,21 +15,95 @@ DEVELOPMENT = os.environ.get("development", "False") == "True"
 if DEVELOPMENT:
     load_dotenv()
 
-# API Config
-HASH_CHALLENGE_LIFESPAN_MINS = int(os.environ.get("HASH_CHALLENGE_LIFESPAN_MINS", "10"))
-HASH_AUTH_LIFESPAN_MINS = int(os.environ.get("HASH_AUTH_LIFESPAN_MINS", "5"))
 
-# SA Cookies
-SA_COOKIES_SESSION_ID = os.environ.get("SA_COOKIES_SESSION_ID")
-SA_COOKIES_SESSION_HASH = os.environ.get("SA_COOKIES_SESSION_HASH")
-SA_COOKIES_BB_USER_ID = os.environ.get("SA_COOKIES_BB_USER_ID")
-SA_COOKIES_BB_PASSWORD = os.environ.get("SA_COOKIES_BB_PASSWORD")
+class CacheSystem(str, Enum):
+    MEMORY = "memory"
+    REDIS = "redis"
 
-# Cache system, redis/memory
-CACHE_SYSTEM = os.environ.get("CACHE_SYSTEM", "memory")
 
-# Redis settings
-CACHE_REDIS_HOST = os.environ.get("CACHE_REDIS_ADDRESS", "localhost")
-CACHE_REDIS_PORT = int(os.environ.get("CACHE_REDIS_PORT", "6379"))
-CACHE_REDIS_DB = int(os.environ.get("CACHE_REDIS_DB", "0"))
-CACHE_REDIS_PASSWORD = os.environ.get("CACHE_REDIS_PASSWORD")
+class ApiSettings(BaseSettings):
+    challenge_lifespan: int = Field(10, env="HASH_CHALLENGE_LIFESPAN_MINS")
+    auth_lifespan: int = Field(5, env="HASH_AUTH_LIFESPAN_MINS")
+
+    cache_system: CacheSystem = Field(CacheSystem.MEMORY, env="CACHE_SYSTEM")
+
+    redis_host: str = Field("localhost", env="CACHE_REDIS_ADDRESS")
+    redis_port: int = Field(6379, env="CACHE_REDIS_PORT")
+    redis_db: int = Field(0, env="CACHE_REDIS_DB")
+    redis_pass: Optional[str] = Field(None, env="CACHE_REDIS_PASSWORD")
+
+
+api_settings = ApiSettings()
+
+
+class SomethingAwfulSettings(BaseSettings):
+    # TODO: rate limiting, etc
+
+    session_id: str = Field(..., env="SA_COOKIES_SESSION_ID")
+    session_hash: str = Field(..., env="SA_COOKIES_SESSION_HASH")
+    bb_user_id: str = Field(..., env="SA_COOKIES_BB_USER_ID")
+    bb_user_pass: str = Field(..., env="SA_COOKIES_BB_PASSWORD")
+
+    profile_url: str = Field(
+        "http://forums.somethingawful.com/member.php?action=getinfo&username=",
+        env="SA_PROFILE_URL",
+    )
+
+    def create_cookie_container(self) -> Dict[str, str]:
+        return {
+            "sessionid": self.session_id,
+            "sessionhash": self.session_hash,
+            "bbuserid": self.bb_user_id,
+            "bbpassword": self.bb_user_pass,
+        }
+
+    def create_profile_url(self, username: str) -> str:
+        # TODO: Handle id as well as username
+        return f"{self.profile_url}{username}"
+
+
+sa_settings = SomethingAwfulSettings()
+
+
+class LoggingSettings(BaseSettings):
+    level: str = Field("info", env="LOGGING_LEVEL")
+    format: str = Field(
+        "<level>{level: <8}</level> <green>{time:YYYY-MM-DD HH:mm:ss.SSS}</green> "
+        + "<cyan>{name}</cyan>:<cyan>{function}</cyan> - <level>{message}</level>",
+        env="LOGGING_FORMAT",
+    )
+
+    file: bool = Field(False, env="LOGGING_ENABLE_FILE")
+    file_path: str = Field("/var/logs", env="LOGGING_FILE_PATH")
+    file_name: str = Field("/access.log", env="LOGGING_FILE_NAME")
+    file_rotation: str = Field("20 days", env="LOGGING_FILE_ROTATION")
+    file_retention: str = Field("1 months", env="LOGGING_FILE_RETENTION")
+
+    def setup_loguru(self):
+        # Remove existing
+        logger.remove()
+
+        # Add stdout
+        logger.add(
+            sys.stdout,
+            enqueue=True,
+            backtrace=True,
+            level=self.level.upper(),
+            format=self.format,
+        )
+
+        # Add file if desires
+        if self.file:
+            path = Path.joinpath(self.file_path, self.file_name)
+            logger.add(
+                str(path),
+                rotation=self.file_rotation,
+                retention=self.file_retention,
+                enqueue=True,
+                backtrace=True,
+                level=self.level.upper(),
+                format=self.format,
+            )
+
+
+logging_settings = LoggingSettings()

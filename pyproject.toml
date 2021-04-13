@@ -19,6 +19,7 @@ requests = "2.25.1"
 httpx = "0.17.1"
 python-dotenv = "0.15.0"
 fakeredis = "1.4.5"
+loguru = "^0.5.3"
 
 [tool.poetry.dev-dependencies]
 flake8 = "^3.9.0"

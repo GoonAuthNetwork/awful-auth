@@ -6,6 +6,7 @@ from fakeredis import FakeStrictRedis
 from fastapi.testclient import TestClient
 
 import app.main
+from app.config import sa_settings
 
 # Mock Redis cache
 app.main.cache = FakeStrictRedis(decode_responses=True)  # noqa: F811
@@ -21,7 +22,7 @@ def generate_username() -> str:
 
 # Generate the url we need to mock for SA profile requests
 def generate_profile_url(user_name: str) -> str:
-    return app.main.SA_PROFILE_URL + user_name
+    return sa_settings.create_profile_url(user_name)
 
 
 # Add a user_name & hash to the redis cache
