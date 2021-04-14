@@ -35,18 +35,26 @@ class VerificationCache:
 
         return None
 
+    def set_auth(self, user_name: str, status: GoonAuthStatus) -> bool:
+        key = f"authed:{user_name}"
+        value = status.json()
+
+        return self.cache.setex(
+            key, api_settings.auth_lifespan, value
+        ) and self.delete_hash(user_name)
+
     def delete_auth(self, user_name: str) -> bool:
         return self.cache.delete(f"authed:{user_name}") >= 1
 
 
 if api_settings.cache_system == "redis":
-    internal_cache = StrictRedis(
+    __internal_cache = StrictRedis(
         host=api_settings.redis_host,
         port=api_settings.redis_port,
         db=api_settings.redis_db,
         password=api_settings.redis_pass,
     )
 else:
-    internal_cache = FakeStrictRedis(decode_responses=True)
+    __internal_cache = FakeStrictRedis(decode_responses=True)
 
-cache = VerificationCache(internal_cache)
+cache = VerificationCache(__internal_cache)

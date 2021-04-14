@@ -29,7 +29,7 @@ class GoonAuthStatus(BaseModel):
         None, title="SA Username", min_length=3, max_length=18, regex="^[\x00-\x7F]+$"
     )
     user_id: Optional[int] = Field(None, title="SA User Id", gt=0)
-    regDate: Optional[datetime] = Field(None, title="SA register date")
-    permaBanned: Optional[datetime] = Field(
+    register_date: Optional[datetime] = Field(None, title="SA register date")
+    permabanned: Optional[datetime] = Field(
         None, title="Date of if/when the user is permanently banned on SA"
     )

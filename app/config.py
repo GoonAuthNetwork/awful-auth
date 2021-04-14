@@ -2,6 +2,7 @@ from enum import Enum
 import os
 from pathlib import Path
 import sys
+from urllib import parse
 from typing import Dict, Optional
 
 from dotenv import load_dotenv
@@ -49,6 +50,11 @@ class SomethingAwfulSettings(BaseSettings):
         env="SA_PROFILE_URL",
     )
 
+    rap_sheet_url: str = Field(
+        "https://forums.somethingawful.com/banlist.php?userid=",
+        env="SA_RAP_SHEET_URL",
+    )
+
     def create_cookie_container(self) -> Dict[str, str]:
         return {
             "sessionid": self.session_id,
@@ -57,9 +63,13 @@ class SomethingAwfulSettings(BaseSettings):
             "bbpassword": self.bb_user_pass,
         }
 
-    def create_profile_url(self, username: str) -> str:
+    def create_profile_url(self, user_name: str) -> str:
         # TODO: Handle id as well as username
-        return f"{self.profile_url}{username}"
+        sanitized_user = parse.quote(user_name)
+        return f"{self.profile_url}{sanitized_user}"
+
+    def create_rap_sheet_url(self, user_id: str) -> str:
+        return f"{self.rap_sheet_url}{user_id}"
 
 
 sa_settings = SomethingAwfulSettings()
