@@ -12,7 +12,7 @@ class VerificationCache:
         self.cache = internal_cache
 
     def get_hash(
-        self, user_name: str, create_if_not_exists: bool = True
+        self, user_name: str, create_if_not_exists: bool = False
     ) -> Optional[str]:
         key = f"hash:{user_name}"
         hash = self.cache.get(key)

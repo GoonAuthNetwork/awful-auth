@@ -39,7 +39,7 @@ def test_update_verification_hash_not_found():
     unpacked = response.json()
 
     assert response.status_code == 404
-    assert unpacked["detail"] == "Hash not found for specified user"
+    assert unpacked["message"] == "Hash not found for specified user"
 
 
 def test_update_verification_missing_profile_hash(httpx_mock: HTTPXMock):
