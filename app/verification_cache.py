@@ -50,7 +50,7 @@ class VerificationCache:
         logger.debug(f"Storing auth for `{user_name}` - {value}")
 
         return self.cache.setex(
-            key, api_settings.auth_lifespan, value
+            key, api_settings.auth_lifespan * 60, value
         ) and self.delete_hash(user_name)
 
     def delete_auth(self, user_name: str) -> bool:
@@ -66,6 +66,7 @@ if api_settings.cache_system == "redis":
         port=api_settings.redis_port,
         db=api_settings.redis_db,
         password=api_settings.redis_pass,
+        decode_responses=True,
     )
     logger.info("Redis connected!")
 else:

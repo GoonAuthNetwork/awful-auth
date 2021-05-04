@@ -49,12 +49,12 @@ async def check_auth_status(user_name: str, hash: str) -> Optional[GoonAuthStatu
 
 
 async def get_profile(user_name: str) -> httpx.Response:
-    async with httpx.AsyncClient() as client:
+    async with httpx.AsyncClient(cookies=__cookies) as client:
         url = sa_settings.create_profile_url(user_name)
-        return await client.get(url, cookies=__cookies)
+        return await client.get(url)
 
 
 async def get_rap_sheet(user_id: str) -> httpx.Response:
-    async with httpx.AsyncClient() as client:
+    async with httpx.AsyncClient(cookies=__cookies) as client:
         url = sa_settings.create_rap_sheet_url(user_id)
-        return await client.get(url, cookies=__cookies)
+        return await client.get(url)

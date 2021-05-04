@@ -56,6 +56,10 @@ async def update_verification(request: GoonAuthRequest = Depends()) -> GoonAuthS
     if not cache.set_auth(request.user_name, status):
         return ApiError.create_response(500, "Failed to save auth")
 
+    # Clean up check
+    if status.validated:
+        cache.delete_hash(request.user_name)
+
     return status
 
 
