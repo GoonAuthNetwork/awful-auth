@@ -27,6 +27,14 @@ flake8 = "^3.9.0"
 black = "^20.8b1"
 pytest = "^6.2.2"
 pytest-httpx = "^0.11.0"
+poethepoet = "^0.10.0"
+
+[tool.poe.env]
+development="True"
+
+[tool.poe.tasks]
+start={ script="scripts:start" }
+generate-openapi={ script="scripts:generate_openapi" }
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
