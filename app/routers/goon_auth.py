@@ -20,7 +20,7 @@ async def generate_verification(
 ) -> GoonAuthChallenge:
     user = request.user_name
 
-    hash = cache.get_hash(user, create_if_not_exists=True)
+    hash = cache.get_hash(user, create_if_not_exists=True, extend_ttl=True)
     if hash is None:
         return ApiError.create_response(500, "Failed to create hash")
 

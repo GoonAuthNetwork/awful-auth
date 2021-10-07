@@ -13,15 +13,20 @@ class VerificationCache:
         self.cache = internal_cache
 
     def get_hash(
-        self, user_name: str, create_if_not_exists: bool = False
+        self, user_name: str, create_if_not_exists: bool = False, extend_ttl=False
     ) -> Optional[str]:
         key = f"hash:{user_name}"
         hash = self.cache.get(key)
 
+        # Create the key if it didn't exist
         created = False
         if hash is None and create_if_not_exists:
             hash = str(uuid.uuid4()).replace("-", "")[:32]
             created = self.cache.setex(key, api_settings.challenge_lifespan * 60, hash)
+
+        # Or else update it's TTL
+        elif extend_ttl:
+            self.cache.expire(key, api_settings.challenge_lifespan * 60)
 
         logger.debug(f"Got hash for `{user_name}`, created: {created}")
 
