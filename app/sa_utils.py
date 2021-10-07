@@ -4,10 +4,12 @@ from typing import Optional
 from bs4 import BeautifulSoup
 import httpx
 
+from app import __version__
 from app.config import sa_settings
 from app.models.goon_auth import GoonAuthStatus
 
 __cookies = sa_settings.create_cookie_container()
+__headers = {"user-agent": f"AwfulAuth/{__version__} (GAN)"}
 
 
 async def check_auth_status(user_name: str, hash: str) -> Optional[GoonAuthStatus]:
@@ -49,12 +51,12 @@ async def check_auth_status(user_name: str, hash: str) -> Optional[GoonAuthStatu
 
 
 async def get_profile(user_name: str) -> httpx.Response:
-    async with httpx.AsyncClient(cookies=__cookies) as client:
+    async with httpx.AsyncClient(cookies=__cookies, headers=__headers) as client:
         url = sa_settings.create_profile_url(user_name)
         return await client.get(url)
 
 
 async def get_rap_sheet(user_id: str) -> httpx.Response:
-    async with httpx.AsyncClient(cookies=__cookies) as client:
+    async with httpx.AsyncClient(cookies=__cookies, headers=__headers) as client:
         url = sa_settings.create_rap_sheet_url(user_id)
         return await client.get(url)
