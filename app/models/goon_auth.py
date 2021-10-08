@@ -10,7 +10,7 @@ class GoonAuthBase(BaseModel):
         title="Something Awful username",
         min_length=3,
         max_length=50,
-        regex="^[\w-_ ]+$",
+        regex="^[a-zA-Z0-9-_ ]{3,50}$",
     )
 
     def user_name_sanitized(self):
@@ -34,7 +34,7 @@ class GoonAuthStatus(BaseModel):
         title="Something Awful username",
         min_length=3,
         max_length=50,
-        regex="^[\w-_ ]+$",
+        regex="^[a-zA-Z0-9-_ ]{3,50}$",
     )
     user_id: Optional[int] = Field(None, title="Something Awful user id", gt=0)
     register_date: Optional[datetime] = Field(
